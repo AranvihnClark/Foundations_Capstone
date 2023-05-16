@@ -5,7 +5,7 @@ const app = express();
 const cors = require('cors');
 
 const { SERVER_PORT } = process.env;
-const { seed } = require('./seed.js');
+const { seed } = require('./controller/seed.js');
 const { 
     getGoodTravelers, 
     getEvilTravelers, 
@@ -16,7 +16,7 @@ const {
     deleteUnsureTravelers,
     updateJoe,
     newGame
-    } = require('./controller.js');
+    } = require('./controller/controller.js');
 
 // ***Middleware***
 app.use(cors());
