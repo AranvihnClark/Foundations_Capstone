@@ -17,34 +17,34 @@
 }
 
 #title-div {
-    border: solid 5px;
+    border: solid 4px;
     grid-column: 1 / 4;
     text-align: center;
 }
 
 #button-div {
-    border: solid 5px;
+    border: solid 4px;
     grid-column: 1 / 1;
     text-align: center;
 }
 
 #view-div {
-    border: solid 5px;
+    border: solid 4px;
     grid-column: 2 / 4;
     text-align: center;
 }
 
 #good-travelers-div {
-    border: solid 5px;
+    border: solid 4px;
     text-align: center;
 }
 
 #evil-travelers-div {
-    border: solid 5px;
+    border: solid 4px;
     text-align: center;
 }
 
 #unsure-travelers-div {
-    border: solid 5px;
+    border: solid 4px;
     text-align: center;
 }
