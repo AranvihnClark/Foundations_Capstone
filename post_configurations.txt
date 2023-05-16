@@ -1,0 +1,5 @@
+Controller.js
+
+ - DROP TABLE IF EXISTS travelers CASCADE;
+  - Probably not needed after testing. Need to consider how I want this to be seeded/restarted when the user wants to play again.
+

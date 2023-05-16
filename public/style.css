@@ -1,0 +1,50 @@
+* {
+    margin: 0%;
+    padding: 0%;
+    height: 99%;
+    width: 100%;
+}
+
+#screen {
+    display: inline-grid;
+    margin-top: 1%;
+    grid-template-columns: repeat(3, 30%);
+    column-gap: 2%;
+    grid-template-rows: 18% 60% 18%;
+    row-gap: 2%;
+    justify-content: center;
+    align-items: center;
+}
+
+#title-div {
+    border: solid 5px;
+    grid-column: 1 / 4;
+    text-align: center;
+}
+
+#button-div {
+    border: solid 5px;
+    grid-column: 1 / 1;
+    text-align: center;
+}
+
+#view-div {
+    border: solid 5px;
+    grid-column: 2 / 4;
+    text-align: center;
+}
+
+#good-travelers-div {
+    border: solid 5px;
+    text-align: center;
+}
+
+#evil-travelers-div {
+    border: solid 5px;
+    text-align: center;
+}
+
+#unsure-travelers-div {
+    border: solid 5px;
+    text-align: center;
+}
