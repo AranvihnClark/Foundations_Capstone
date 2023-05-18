@@ -26,6 +26,9 @@ app.use(express.static(`${__dirname}/public`));
 // Dev
 app.post('/seed', seed);
 
+// Actions
+app.get('/', nextAction);
+
 // Good Travelers
 app.get('/good-travelers-list', getGoodTravelers);
 app.post('/good-travelers', addGoodTravelers);
