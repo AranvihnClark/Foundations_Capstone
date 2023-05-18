@@ -74,8 +74,24 @@ module.exports = {
 
     },
 
-    updateJoe: (req, res) => {
+    getJoe: (req, res) => {
+        sequelize.query(`
+            SELECT mental_health
+            FROM joe
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err));
+    },
 
+    updateJoe: (req, res) => {
+        const { mental_health } = req.body;
+        sequelize.query(`
+            UPDATE joe
+            SET mental_health = '${mental_health}'
+            WHERE joe_id = 1;
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err));
     },
 
     newGame: (req, res) => {

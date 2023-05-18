@@ -102,6 +102,24 @@ function getView(view) {
     viewText.innerHTML = `${view}`;
 }
 
+// Gets Joe's mental health and then updates it
+function joesHealth(decrease) {
+    axios.get(`${baseURL}/joe`)
+    .then(res => {
+        
+        // This gets the current mental health of Joe and stores it into our newly made object for the PUT request.        
+        let body = {
+            mental_health: res.data[0].mental_health - decrease
+        };
+        
+        // Then we update it to the database below.
+        axios.put(`${baseURL}/joe/`, body)
+        .then()
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
+}
+
 // Displays the continue button after each choice is made.
 // Necessary so the user has enough time to read the view before moving to the next event.
 function continueBtn() {
@@ -221,6 +239,7 @@ const buttonOneSubmit = debounce(function() {
                 getView(`${res.data[0].response}`)
 
                 actionNumber--;
+                joesHealth(10);
                 displayActionNumber();
                 continueBtn();
             })

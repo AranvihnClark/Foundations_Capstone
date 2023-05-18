@@ -16,6 +16,7 @@ const {
     addEvilTravelers, 
     addUnsureTravelers, 
     deleteUnsureTravelers,
+    getJoe,
     updateJoe,
     newGame
     } = require('./controller/controller.js');
@@ -47,6 +48,7 @@ app.post('/unsure-travelers', addUnsureTravelers);
 app.delete('/unsure-travelers/:id', deleteUnsureTravelers);
 
 // Joe
+app.get('/joe', getJoe);
 app.put('/joe', updateJoe);
 
 // Restart
