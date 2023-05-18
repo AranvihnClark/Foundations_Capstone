@@ -7,6 +7,8 @@ const cors = require('cors');
 const { SERVER_PORT } = process.env;
 const { seed } = require('./controller/seed.js');
 const { 
+    nextAction,
+    outcome,
     getGoodTravelers, 
     getEvilTravelers, 
     getUnsureTravelers, 
@@ -19,6 +21,7 @@ const {
     } = require('./controller/controller.js');
 
 // ***Middleware***
+app.use(express.json());
 app.use(cors());
 app.use(express.static(`${__dirname}/public`));
 
@@ -27,7 +30,8 @@ app.use(express.static(`${__dirname}/public`));
 app.post('/seed', seed);
 
 // Actions
-app.get('/', nextAction);
+app.get('/next-action', nextAction);
+app.get('/outcome', outcome);
 
 // Good Travelers
 app.get('/good-travelers-list', getGoodTravelers);

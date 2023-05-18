@@ -11,6 +11,7 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
     }
 });
 
+let eventsID = 0;
 /*
                     ('name', age, 'occupation', good?, height, weight, 'difficulty',
                     'interrogate_traveler',
@@ -23,6 +24,28 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
 */
 
 module.exports = {
+    nextAction: (req, res) => {
+        eventsID++;
+        sequelize.query(`
+            SELECT *
+            FROM events
+            WHERE event_id = ${eventsID};
+            `
+        )
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err));        
+    },
+
+    outcome: (req, res) => {
+        sequelize.query(`
+            SELECT *
+            FROM event_responses
+            WHERE event_id = ${eventsID}
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err));
+    },
+
     getGoodTravelers: (req, res) => {
 
     },

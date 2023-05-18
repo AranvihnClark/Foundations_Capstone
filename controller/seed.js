@@ -155,7 +155,19 @@ module.exports = {
                 unsure_traveler_id SERIAL PRIMARY KEY,
                 traveler_id INT REFERENCES travelers(traveler_id)
             );
-            `)
+
+            CREATE TABLE event_responses(
+                event_response_id SERIAL PRIMARY KEY,
+                event_id INT REFERENCES events(event_id),
+                response TEXT NOT NULL
+            );
+            
+            INSERT INTO event_responses(event_id, response)
+            VALUES (1, '<p class="default-bgColor text-color">You decide that you''ll just have the bread and spread the mustard on it. Although it isn''t a breakfast for champions, you aren''t one anyway. You eat it and feel good. Then you look at the expiration date on the mustard and see that it expired a few weeks ago. You hope it doesn''t affect your work later today...</p>'),
+                   (1, '<p class="default-bgColor text-color">You decide that going out to grab some food would probably be for the best, especially since your mustard was expired a few weeks ago. You''re glad you didn''t eat it. You go out and eat at the local cafe and eat some buttered toast and scrambled eggs. It was definitely worth coming out this morning.</p>'),
+                   (1, '<p class="default-bgColor text-color">You''re feeling a little lazy and choose to not eat. You spend the extra time in your bed and relaxing, something you haven''t been able to do in a while. Though your hunger bothers you, it isn''t something you''re not used to.</p>'
+            );
+        `)
         .then(() => {
             console.log(`Database seeding was successful.`);
             res.sendStatus(200);
