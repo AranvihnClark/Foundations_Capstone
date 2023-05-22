@@ -24,12 +24,12 @@ let eventsID = 0;
 */
 
 module.exports = {
-    nextAction: (req, res) => {
+    nextJoeAction: (req, res) => {
         eventsID++;
         sequelize.query(`
             SELECT *
-            FROM events
-            WHERE event_id = ${eventsID};
+            FROM joe_events
+            WHERE joe_event_id = ${eventsID};
             `
         )
         .then(dbRes => res.status(200).send(dbRes[0]))
@@ -39,39 +39,107 @@ module.exports = {
     outcome: (req, res) => {
         sequelize.query(`
             SELECT *
-            FROM event_responses
-            WHERE event_id = ${eventsID}
+            FROM joe_event_responses
+            WHERE joe_event_id = ${eventsID}
+        `)
+        .then(dbRes => {
+            // console.log(dbRes[0]);
+            return res.status(200).send(dbRes[0]);
+        })
+        .catch(err => console.log(err));
+    },
+
+    getTravelers: (req, res) => {
+        sequelize.query(`
+            SELECT *
+            FROM travelers
+            WHERE difficulty = 'Easy';
+        
+            SELECT *
+            FROM travelers
+            WHERE difficulty = 'Medium';
+
+            SELECT *
+            FROM travelers
+            WHERE difficulty = 'Hard';
         `)
         .then(dbRes => res.status(200).send(dbRes[0]))
         .catch(err => console.log(err));
     },
 
     getGoodTravelers: (req, res) => {
-
+        sequelize.query(`
+            SELECT name
+            FROM travelers as t
+            JOIN good_travelers as n
+            ON t.traveler_id = n.traveler_id;
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err));
     },
 
     getEvilTravelers: (req, res) => {
-
+        sequelize.query(`
+            SELECT name
+            FROM travelers as t
+            JOIN evil_travelers as e
+            ON t.traveler_id = e.traveler_id;
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err));
     },
 
     getUnsureTravelers: (req, res) => {
+        sequelize.query(`
+            SELECT name
+            FROM travelers as t
+            JOIN unsure_travelers as u
+            ON t.traveler_id = u.traveler_id;
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err));
 
     },
 
     addGoodTravelers: (req, res) => {
+        const { id } = req.body;
 
+        sequelize.query(`
+            INSERT INTO good_travelers(traveler_id)
+            VALUES (${id});
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err));
     },
 
     addEvilTravelers: (req, res) => {
+        const { id } = req.body;
 
+        sequelize.query(`
+            INSERT INTO evil_travelers(traveler_id)
+            VALUES (${id});
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err));
     },
 
     addUnsureTravelers: (req, res) => {
+        const { id } = req.body;
 
+        sequelize.query(`
+            INSERT INTO unsure_travelers(traveler_id)
+            VALUES (${id});
+        `)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err));
     },
 
     deleteUnsureTravelers: (req, res) => {
 
+    },
+
+    increaseJoeEventID: (req, res) => {
+        eventsID++;
     },
 
     getJoe: (req, res) => {

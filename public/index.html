@@ -10,14 +10,15 @@
 <body>
   <section id="screen">
     <div id="title-div" class="base-border default-bgColor">
-      <h1 id="title-text" class="text-center text-color default-bgColor">Joe The Guard - Day <em id="day-number" class="text-color default-bgColor"></em>
+      <h1 id="title-text" class="text-center text-color default-bgColor title">Joe The Guard - Day <em id="day-number" class="text-color default-bgColor"></em>
       </h1>
     </div>
     
     <div id="button-div" class="base-border">
         <ul id="button-grid" class="default-bgColor">
-          <h1 id="button-title" class="text-center text-color default-bgColor">Your Action(s)</h1>
-          <h1 id="action-counter" class="text-center text-color default-bgColor">Action(s): <em id="action-number"class="default-bgColor"></em></h1>
+          <h1 id="button-title" class="text-center text-color default-bgColor title">Your Action(s)</h1>
+          <h1 id="mental-health-counter" class="text-center text-color default-bgColor title">Mental Health: <em id="mental-health-number" class="default-bgColor"></em></h1>
+          <h1 id="action-counter" class="text-center text-color default-bgColor title">Action(s): <em id="action-number" class="default-bgColor"></em></h1>
           <h1 id="option-one-text" class="text-color default-bgColor button-text-size button-text"> <!-- Inspect Features --></h1>
             <button id="button-one" class="base-border button-position border-radius">Confirm</button>
           <h1 id="option-two-text" class="text-color default-bgColor button-text-size button-text"> <!-- Inspect Clothing --></h1>
@@ -28,26 +29,29 @@
             <button id="button-four" class="base-border button-position border-radius hide">Confirm</button>
           <h1 id="option-five-text" class="text-color default-bgColor button-text-size button-text"> <!-- Special Interaction --></h1>
             <button id="button-five" class="base-border button-position border-radius hide">Confirm</button>
-          <button class="base-border button-position border-radius hide">Good?</button>
-          <button class="base-border button-position border-radius hide">Evil?</button>
-          <button class="base-border button-position border-radius hide">Unsure?</button>
+          <button id="good-button" class="base-border button-position border-radius hide">Good?</button>
+          <button id="evil-button" class="base-border button-position border-radius hide">Evil?</button>
+          <button id="unsure-button" class="base-border button-position border-radius hide">Unsure?</button>
         </ul>
     </div>
     
-    <div id="view-div" class="base-border">
-      <h1 id="view-text" class="text-color default-bgColor">Viewing Window</h1>
+    <div id="view-div" class="base-border default-bgColor">
+      <h1 id="view-text" class="text-color default-bgColor"></h1>
     </div>
     
-    <div id="good-travelers-div" class="base-border">
-      <h1 class="text-center text-color default-bgColor">Good Travelers</h1>
+    <div id="good-travelers-div" class="base-border list-grids">
+      <h1 class="text-center text-color default-bgColor title">Good Travelers</h1>
+      <h1 id="good-travelers-view" class="text-center text-color default-bgColor"></h1>
     </div>
     
-    <div id="evil-travelers-div" class="base-border">
-      <h1 class="text-center text-color default-bgColor">Evil Travelers</h1>
+    <div id="evil-travelers-div" class="base-border list-grids">
+      <h1 class="text-center text-color default-bgColor title">Evil Travelers</h1>
+      <h1 id="evil-travelers-view" class="text-center text-color default-bgColor"></h1>
     </div>
     
-    <div id="unsure-travelers-div" class="base-border">
-      <h1 class="text-center text-color default-bgColor">Unsure Travelers</h1>
+    <div id="unsure-travelers-div" class="base-border list-grids">
+      <h1 class="text-center text-color default-bgColor title">Unsure Travelers</h1>
+      <h1 id="unsure-travelers-view" class="text-center text-color default-bgColor"></h1>
     </div>
   </section>
 
