@@ -101,6 +101,7 @@ function debounce(func, wait, immediate) {
 
 const restart = debounce(function() {
     // dayNumber = 1;
+    dayVariable.classList.add('hide');
     actionNumber = 1;
     timeOfDay = 'Morning';
     eventsCounter = 0;
@@ -147,7 +148,7 @@ const start = debounce(function() {
     getView(view);
     displayActionOne(action);
     displayActionNumber(actionNumber);
-    // displayDayNumber(dayNumber);
+    displayDayNumber();
     joesHealth(0);
     getTravelers();
     getJoesEvents();
@@ -235,9 +236,9 @@ function getTravelers() {
 }
 
 // Displays the number of day the user is currently on.
-// function displayDayNumber() {
-//     dayVariable.innerHTML = dayNumber + `, ${timeOfDay}`;
-// }
+function displayDayNumber() {
+    dayVariable.innerHTML = `${timeOfDay}`; //dayNumber + 
+}
 
 // Displays Joe's current mental health.
 function displayMHealthNumber(num) {
@@ -578,6 +579,7 @@ const buttonOneSubmit = debounce(function() {
     if (actionOneText.innerHTML === 'Start') {
         eventsCounter++;
         // Then we display Joe's event.
+        dayVariable.classList.remove('hide');
         refreshJoeEvent();
         return;
     }
@@ -650,7 +652,7 @@ const buttonOneSubmit = debounce(function() {
                 if (actionOneText.innerHTML === 'Continue?') {
                     eventsCounter += 0.5;
                     timeOfDay = 'Noon';
-                    // displayDayNumber();
+                    displayDayNumber();
                     refreshJoeEvent();
                     break;
                 }
@@ -722,7 +724,7 @@ const buttonOneSubmit = debounce(function() {
                 if (actionOneText.innerHTML === 'Continue?') {
                     eventsCounter += 0.5;
                     timeOfDay = 'Evening';
-                    // displayDayNumber();
+                    displayDayNumber();
                     refreshJoeEvent();
                     break;
                 }
@@ -808,7 +810,7 @@ const buttonOneSubmit = debounce(function() {
                     actionNumber = 1;
                     timeOfDay = 'END';
                     displayActionNumber;
-                    // displayDayNumber();
+                    displayDayNumber();
                     clearView();
 
                     if (actionTwoText.classList.contains(`hide`)) {
