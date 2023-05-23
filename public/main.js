@@ -22,6 +22,9 @@ const unsureBtn = document.querySelector('#unsure-button');
 const goodView = document.querySelector('#good-travelers-view');
 const evilView = document.querySelector('#evil-travelers-view');
 const unsureView = document.querySelector('#unsure-travelers-view');
+const goodDiv = document.getElementById('#good-travelers-div');
+const evilDiv = document.getElementById('#evil-travelers-div');
+const unsureDiv = document.getElementById('#unsure-travelers-div');
 
 // View text element
 const viewText = document.querySelector('#view-text');
@@ -134,7 +137,10 @@ const restart = debounce(function() {
 
 // The start of the app when it is first ran.
 const start = debounce(function() {
-    view = 'Hello. Welcome to Joe the Guard. Please click START on the left when you are ready to begin!';
+    view = `Welcome to Joe the Guard!<br><br>
+            In this simulator, you will play as Joe, the Guard and act as the sole guardian of whole may enter the Kingdom of Gloria. As you stand guard, you will meet with travelers and determine if they are safe travelers or if they have evil intentions. Or if you are unsure, you can send them to be held until the end of the day.<br><br>
+            During this single day, you will also have a chance to take a break and give Joe a chance to recuperate his mental health. Keep in mind that his mental health contributes to your total score at the end of the day.<br><br>
+            Please click START on the left when you are ready to begin!`;
     action = 'Start';
 
     // The below are functions that present the opening screen for users to see when it first renders.
@@ -820,7 +826,7 @@ const buttonOneSubmit = debounce(function() {
                     asked = true;
                     checkedSpecial = true;
 
-                    getView(`Congrats! You've reached the end!<br><br>You scored a ${score + hiddenScore} for your day in the life of Joe!`);
+                    getView(`Congrats! You've reached the end!<br><br>You scored a ${score + hiddenScore + Math.floor(+mHealthNumber.innerHTML / 2)} for your day in the life of Joe!`);
 
                     getView(`<br><br> For the ones that you put into unsure, we have provided you with the proper scoring adjustments already. Unfortunately, for fairness' sake, we will not be showing if you they are good or evil travelers.`)
 
@@ -1593,6 +1599,7 @@ function addToGood() {
     .then(res => {
         asked = false;
         checkedSpecial = false;
+        sCounter = 0;
 
         getGoodDisplay();
 
@@ -1608,6 +1615,10 @@ function addToGood() {
             score += 2;
         }
 
+        goodDiv.scrollTop = goodDiv.scrollHeight;
+        evilDiv.scrollTop = evilDiv.scrollHeight;
+        unsureDiv.scrollTop = unsureDiv.scrollHeight;
+        
         // To reset the number of actions for the continue section.
         actionNumber = 1;
         displayActionNumber();
@@ -1640,6 +1651,7 @@ const addToEvil = debounce(function() {
     .then(res => {
         asked = false;
         checkedSpecial = false;
+        sCounter = 0;
 
         getEvilDisplay();
 
@@ -1654,6 +1666,10 @@ const addToEvil = debounce(function() {
         } else {
             score += 2;
         }
+
+        goodDiv.scrollTop = goodDiv.scrollHeight;
+        evilDiv.scrollTop = evilDiv.scrollHeight;
+        unsureDiv.scrollTop = unsureDiv.scrollHeight;
 
         // To reset the number of actions for the continue section.
         actionNumber = 1;
@@ -1688,6 +1704,7 @@ const addToUnsure = debounce(function() {
     .then(res => {
         asked = false;
         checkedSpecial = false;
+        sCounter = 0;
 
         getUnsureDisplay();
         
@@ -1703,6 +1720,10 @@ const addToUnsure = debounce(function() {
             hiddenScore--;
             joesHealth(1);
         }
+
+        goodDiv.scrollTop = goodDiv.scrollHeight;
+        evilDiv.scrollTop = evilDiv.scrollHeight;
+        unsureDiv.scrollTop = unsureDiv.scrollHeight;
 
         // To reset the number of actions for the continue section.
         actionNumber = 1;

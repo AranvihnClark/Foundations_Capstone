@@ -79,6 +79,16 @@
     text-decoration: none;
 }
 
+#good-travelers-div {
+    overflow-y: scroll;
+}
+#evil-travelers-div {
+    overflow-y: scroll;
+}
+#unsure-travelers-div {
+    overflow-y: scroll;
+}
+
 #button-grid {
     display: inline-grid;
     grid-template-columns: 30% 30% 30%;
