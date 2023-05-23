@@ -67,7 +67,7 @@ module.exports = {
                 'You open the notebook and find an average pencil drawing of the forest. The trees are detailed with slightly too many strokes but you think that was the point of it. The background is faded but you can still somewhat make out the deer walking away.'
                 ),
 
-                ('Duncan Turner', 28, 'Soldier', true, '6'' 2''''', '194 lb', 'Medium', 0,
+                ('Duncan Turner', 28, 'Soldier', true, '6'' 2''''', '194 lb', 'Medium', -1,
                 '"Hello, I''m just returning from our daily security route. Not much happened today. Animals seem to be calm today and nothing seems to be out of the ordinary. I''d like to get in so that I can take this armor off take a bath. This smell eventually becomes you if yourself fester inside it long enough."',
                 'There isn''t much to note. The armor hides anything that his body could be hiding. He is slightly leaning on his spear, indicating that he could be tired from working. His eyes stare straight at you as he waits to hear your decision.',
                 'Duncan is wearing the exact same thing you are. It looks like he is a soldier. His face guard is lifted so that you can see a man inside. Other than that, there isn''t much to say. The armor you both wear covers your entire body. The only thing that adds any fashion to such a dull armor is the tabard you both wear with the emblem of the kingdom on it, a Gryphon in flight. There is one difference now that you are looking at the soldier in front of you. His tabard has a green band around the shoulders, indicating his rank is one below yours as you have a blue band.',

@@ -22,9 +22,9 @@ const unsureBtn = document.querySelector('#unsure-button');
 const goodView = document.querySelector('#good-travelers-view');
 const evilView = document.querySelector('#evil-travelers-view');
 const unsureView = document.querySelector('#unsure-travelers-view');
-const goodDiv = document.getElementById('#good-travelers-div');
-const evilDiv = document.getElementById('#evil-travelers-div');
-const unsureDiv = document.getElementById('#unsure-travelers-div');
+const goodDiv = document.getElementById('good-travelers-div');
+const evilDiv = document.getElementById('evil-travelers-div');
+const unsureDiv = document.getElementById('unsure-travelers-div');
 
 // View text element
 const viewText = document.querySelector('#view-text');
@@ -287,15 +287,17 @@ function getView(view) {
     }
 
     // Reveals the special interrogation button.
-    if (easyCheck === sCounter || mediumCheck === sCounter || hardCheck === sCounter && !checkedSpecial) {
-        actionFiveBtn.classList.remove('hide');
-        actionFiveText.classList.remove('hide');
-    }
-
-    if (checkedSpecial) {
-        if(!(actionFiveText.classList.contains(`hide`))) {
-        actionFiveBtn.classList.add('hide');
-        actionFiveText.classList.add('hide');
+    if (checkedSpecial === false) {
+        if (easyCheck === sCounter || mediumCheck === sCounter || hardCheck === sCounter) {
+            actionFiveBtn.classList.remove('hide');
+            actionFiveText.classList.remove('hide');
+        }
+    } else {
+        if (checkedSpecial === true) {
+            if(!(actionFiveText.classList.contains(`hide`))) {
+            actionFiveBtn.classList.add('hide');
+            actionFiveText.classList.add('hide');
+            }
         }
     }
 
@@ -494,22 +496,12 @@ function joeEventButtons(event) {
         actionThreeBtn.classList.add(`hide`);
     }
 
-    if (event.hasOwnProperty(`button_four`)) {
-        actionFourText.classList.remove(`hide`);
-        actionFourBtn.classList.remove(`hide`);
-
-        displayActionFour(event.button_four)
-    } else if (!(actionFourText.classList.contains(`hide`))) {
+    if (!(actionFourText.classList.contains(`hide`))) {
         actionFourText.classList.add(`hide`);
         actionFourBtn.classList.add(`hide`);
     }
 
-    if (event.hasOwnProperty(`button_five`)) {
-        actionFiveText.classList.remove(`hide`);
-        actionFiveBtn.classList.remove(`hide`);
-
-        displayActionFive(event.button_five)
-    } else if (!(actionFiveText.classList.contains(`hide`))) {
+    if (!(actionFiveText.classList.contains(`hide`))) {
         actionFiveText.classList.add(`hide`);
         actionFiveBtn.classList.add(`hide`);
     }
@@ -563,6 +555,10 @@ function displayTravelerEvent(traveler) {
 
     displayActionFour('Ask for help?');
     displayActionFive('Inspect ???');
+    if (!(actionFiveText.classList.contains(`hide`))) {
+        actionFiveText.classList.add(`hide`);
+        actionFiveBtn.classList.add(`hide`);
+    }
 
     goodBtn.classList.remove('hide');
     evilBtn.classList.remove('hide');
@@ -581,8 +577,6 @@ function deleteAllSavedLists() {
 const buttonOneSubmit = debounce(function() {
     if (actionOneText.innerHTML === 'Start') {
         eventsCounter++;
-        console.log(`Beginning - Event counter: `, eventsCounter);
-        console.log(`Beginning - easy travelers: `, easyTravelers);
         // Then we display Joe's event.
         refreshJoeEvent();
         return;
@@ -735,9 +729,7 @@ const buttonOneSubmit = debounce(function() {
                 break;
             // Evening Joe Event
             case 9:
-                console.log(`Case: `, eventsCounter);
                 updateEventID();
-                console.log(`JoesEvent ID: `, joesEventID);
                 switch (joesEventID) {
                     case 7:
                         score -= 1;
@@ -863,30 +855,31 @@ const buttonOneSubmit = debounce(function() {
                 // We also need to refresh the action counter.
                 askForHelp = 0;
                 sCounter = 0;
+                checkedSpecial = false;
                 actionNumber = 3;
                 displayActionNumber();
 
-                easyCheck = easyTravelers[travelerCounter].special_counter;
-                mediumCheck = mediumTravelers[travelerCounter].special_counter;
-                hardCheck = hardTravelers[travelerCounter].special_counter;
 
                 // This displays the next traveler's opening encounter.
                 clearView();
 
                 if (travelersToday === 0) {
+                    easyCheck = easyTravelers[travelerCounter].special_counter;
                     displayTravelerEvent(easyTravelers[travelerCounter]);
                     travelerID = easyTravelers[travelerCounter].traveler_id;
                 }
                 if (travelersToday === 1) {
+                    easyCheck = -1;
+                    mediumCheck = mediumTravelers[travelerCounter].special_counter;
                     displayTravelerEvent(mediumTravelers[travelerCounter]);
                     travelerID = mediumTravelers[travelerCounter].traveler_id;
                 }
                 if (travelersToday === 2) {
+                    mediumCheck = -1;
+                    hardCheck = hardTravelers[travelerCounter].special_counter;
                     displayTravelerEvent(hardTravelers[travelerCounter]);
                     travelerID = hardTravelers[travelerCounter].traveler_id;
                 }
-                console.log(`Case: `, eventsCounter);
-                console.log(`Traveler Count: `, travelerCounter);
                 break;
         }
     }
@@ -957,10 +950,7 @@ const buttonTwoSubmit = debounce(function() {
             break;
         // Noon Joe Event 1
         case 5:
-            console.log(`Noon Joe Event`);
-            console.log(`Case: `, eventsCounter);
             updateEventID();
-            console.log(`JoesEvent ID: `, joesEventID);
             switch (joesEventID) {
                 case 4:
                     score -= 1;
@@ -1034,9 +1024,7 @@ const buttonTwoSubmit = debounce(function() {
             break;
         // Evening Joe Event
         case 9:
-            console.log(`Case: `, eventsCounter);
             updateEventID();
-            console.log(`JoesEvent ID: `, joesEventID);
             switch (joesEventID) {
                 case 7:
                     score -= 2;
@@ -1110,11 +1098,11 @@ const buttonTwoSubmit = debounce(function() {
             break;
         // End
         case 13:
-            close();
+            restart();
             deleteAllSavedLists();
             joesHealth(-100);
             clearView();
-            server.close();
+            setTimeout(close(), 2000);
             break;
         default:
             break;
@@ -1150,7 +1138,7 @@ const buttonThreeSubmit = debounce(function() {
                 askForHelp++;
             }
 
-            if (travelerID === 1 || travelerID === 2 || travelerID === 3 || travelerID === 10) {
+            if (travelerID === 1 || travelerID === 3 || travelerID === 10) {
                 sCounter++;
             }
 
@@ -1168,7 +1156,7 @@ const buttonThreeSubmit = debounce(function() {
                 askForHelp++;
             }
 
-            if (travelerID === 1 || travelerID === 2 || travelerID === 3 || travelerID === 10) {
+            if (travelerID === 1 || travelerID === 3 || travelerID === 10) {
                 sCounter++;
             }
 
@@ -1186,7 +1174,7 @@ const buttonThreeSubmit = debounce(function() {
                 askForHelp++;
             }
 
-            if (travelerID === 1 || travelerID === 2 || travelerID === 3 || travelerID === 10) {
+            if (travelerID === 1 || travelerID === 3 || travelerID === 10) {
                 sCounter++;
             }
 
@@ -1198,10 +1186,7 @@ const buttonThreeSubmit = debounce(function() {
             break;
         // Noon Joe Event 1
         case 5:
-            console.log(`Noon Joe Event`);
-            console.log(`Case: `, eventsCounter);
             updateEventID();
-            console.log(`JoesEvent ID: `, joesEventID);
             switch (joesEventID) {
                 case 4:
                     score += 2;
@@ -1275,9 +1260,7 @@ const buttonThreeSubmit = debounce(function() {
             break;
         // Evening Joe Event
         case 9:
-            console.log(`Case: `, eventsCounter);
             updateEventID();
-            console.log(`JoesEvent ID: `, joesEventID);
             switch (joesEventID) {
                 case 7:
                     score += 2;
@@ -1618,7 +1601,7 @@ function addToGood() {
         goodDiv.scrollTop = goodDiv.scrollHeight;
         evilDiv.scrollTop = evilDiv.scrollHeight;
         unsureDiv.scrollTop = unsureDiv.scrollHeight;
-        
+
         // To reset the number of actions for the continue section.
         actionNumber = 1;
         displayActionNumber();
