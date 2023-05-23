@@ -25,6 +25,7 @@ const unsureView = document.querySelector('#unsure-travelers-view');
 
 // View text element
 const viewText = document.querySelector('#view-text');
+const viewDiv = document.getElementById('view-div');
 
 // Other Elements element
 const dayVariable = document.querySelector('#day-number');
@@ -34,12 +35,20 @@ const mHealthNumber = document.querySelector('#mental-health-number');
 const baseURL = `http://localhost:4040`;
 
 // Declaration of various variables
-let dayNumber = 1;
+// let dayNumber = 1;
 let actionNumber = 1;
 let timeOfDay = 'Morning';
 let eventsCounter = 0;
-let joesAction = true;
 let score = 0;
+let hiddenScore = 0;
+
+// Joe's variables
+let joesAction = true;
+let joesEventID = 0;
+let joesEventsCounter = 0;
+let morningEvents = [];
+let noonEvents = [];
+let eveningEvents = [];
 
 // Game difficulty variable - for scalability if I ever need to maket he project bigger.
 // We'll let it be 3 for now for three travelers a day.
@@ -54,11 +63,14 @@ let easyTravelers = [];
 let mediumTravelers = [];
 let hardTravelers = [];
 let askForHelp = 0;
+let asked = false;
 let sCounter = 0;
+let checkedSpecial = false;
 let easyCheck = -1
 let mediumCheck = -1
 let hardCheck = -1;
 let unsureFilled = false;
+let travelersToday = 0;
 
 // Buttons clicked?
 let btnOneUsed = false;
@@ -84,8 +96,44 @@ function debounce(func, wait, immediate) {
 	};
 };
 
+const restart = debounce(function() {
+    // dayNumber = 1;
+    actionNumber = 1;
+    timeOfDay = 'Morning';
+    eventsCounter = 0;
+    score = 0;
+    joesAction = true;
+    joesEventID = 0;
+    joesEventsCounter = 0;
+    morningEvents = [];
+    noonEvents = [];
+    eveningEvents = [];
+    gameDifficulty = 3;
+    evilTravelers = gameDifficulty - (Math.ceil(gameDifficulty / 6) + 1);
+    travelerID = 0;
+    travelerCounter = -1;
+    allTravelers = [];
+    easyTravelers = [];
+    mediumTravelers = [];
+    hardTravelers = [];
+    askForHelp = 0;
+    asked = false;
+    sCounter = 0;
+    checkedSpecial = false;
+    easyCheck = -1
+    mediumCheck = -1
+    hardCheck = -1;
+    unsureFilled = false;
+    travelersToday = 0;
+    btnOneUsed = false;
+    btnTwoUsed = false;
+    btnThreeUsed = false;
+    btnFourUsed = false;
+    btnFiveUsed = false;
+}, 500);
+
 // The start of the app when it is first ran.
-function start() {
+const start = debounce(function() {
     view = 'Hello. Welcome to Joe the Guard. Please click START on the left when you are ready to begin!';
     action = 'Start';
 
@@ -93,12 +141,13 @@ function start() {
     getView(view);
     displayActionOne(action);
     displayActionNumber(actionNumber);
-    displayDayNumber(dayNumber);
+    // displayDayNumber(dayNumber);
     joesHealth(0);
     getTravelers();
-}
+    getJoesEvents();
+}, 1000);
 
-function shuffleTravlers(array) {
+function shuffler(array) {
     let currentIndex = array.length,  randomIndex;
 
         // Loops while there are still indexes to randomize.
@@ -130,7 +179,7 @@ function getTravelers() {
 
         // First let's randomize our travelers and insert them into the game variables.
         // I wasn't going to create a function but on the off chance I need it again, it keeps me DRY (or my DRY than I would be if I didn't use a function)
-        shuffleTravlers(allTravelers);
+        shuffler(allTravelers);
 
         // Now let's grab all of the easy travelers that we need.
 
@@ -180,12 +229,12 @@ function getTravelers() {
 }
 
 // Displays the number of day the user is currently on.
-function displayDayNumber() {
-    dayVariable.innerHTML = dayNumber + `, ${timeOfDay}`;
-}
+// function displayDayNumber() {
+//     dayVariable.innerHTML = dayNumber + `, ${timeOfDay}`;
+// }
 
 // Displays Joe's current mental health.
-function displayMHeatlthNumber(num) {
+function displayMHealthNumber(num) {
     mHealthNumber.innerHTML = num;
 }
 
@@ -232,9 +281,23 @@ function getView(view) {
     }
 
     // Reveals the special interrogation button.
-    if (easyCheck === sCounter || mediumCheck === sCounter || hardCheck === sCounter) {
+    if (easyCheck === sCounter || mediumCheck === sCounter || hardCheck === sCounter && !checkedSpecial) {
         actionFiveBtn.classList.remove('hide');
         actionFiveText.classList.remove('hide');
+    }
+
+    if (checkedSpecial) {
+        if(!(actionFiveText.classList.contains(`hide`))) {
+        actionFiveBtn.classList.add('hide');
+        actionFiveText.classList.add('hide');
+        }
+    }
+
+    if (asked) {
+        if(!(actionFourText.classList.contains(`hide`))) {
+            actionFourBtn.classList.add('hide');
+            actionFourText.classList.add('hide');
+            }
     }
 
     if (actionNumber === 0) {
@@ -262,6 +325,7 @@ function getView(view) {
             actionFiveBtn.classList.add(`hide`);
         }
     }
+    viewDiv.scrollTop = viewDiv.scrollHeight;
 }
 
 // Gets Joe's mental health and then updates it
@@ -282,7 +346,7 @@ function joesHealth(decrease) {
         };
 
         // We then display Joe's current mental health.
-        displayMHeatlthNumber(body.mental_health);
+        displayMHealthNumber(body.mental_health);
         
         // Then we update it to the database below.
         axios.put(`${baseURL}/joe/`, body)
@@ -323,85 +387,145 @@ function continueBtn() {
         actionFiveText.classList.add(`hide`);
         actionFiveBtn.classList.add(`hide`);
     }
+
+    // Hiding the good, evil, and unsure buttons
+    if (!(goodBtn.classList.contains(`hide`))) {
+        goodBtn.classList.add(`hide`);
+    }
+
+    if (!(evilBtn.classList.contains(`hide`))) {
+        evilBtn.classList.add(`hide`);
+    }
+
+    if (!(unsureBtn.classList.contains(`hide`))) {
+        unsureBtn.classList.add(`hide`);
+    }
+}
+
+// A get request to pull the next event for Joe.
+function getJoesEvents() {
+    axios.get(`${baseURL}/joes-action`)
+    .then(res => {
+        let allEvents = res.data;
+        shuffler(allEvents);
+
+        allEvents.forEach(event => {
+            if (event.time_of_day === 'Morning') {
+                if (morningEvents.length <= gameDifficulty) {
+                    morningEvents.push(event);
+                }
+            }
+
+            if (event.time_of_day === 'Noon') {
+                if (noonEvents.length <= gameDifficulty) {
+                    noonEvents.push(event);
+                }
+            }
+            
+            if (event.time_of_day === 'Evening') {
+                if (eveningEvents.length <= gameDifficulty) {
+                    eveningEvents.push(event);
+                }
+            }
+        })
+    })
+    .catch(err => console.log(err));
 }
 
 // This will refresh the event to the next main event.
 function refreshJoeEvent() {
+    clearView();
 
-    // A get request to pull the next event for Joe.
-    axios.get(`${baseURL}/next-joe-action`)
-    .then(res => {
-        // Clears the view first.
-        clearView();
-        getView(res.data[0].view_text);
-        
-        if (res.data[0].hasOwnProperty(`button_one`)) {
-            actionOneText.classList.remove(`hide`);
-            actionOneBtn.classList.remove(`hide`);
+    if (timeOfDay === 'Morning') {    
+        joesEventID = morningEvents[joesEventsCounter].joe_event_id;
+        getView(morningEvents[joesEventsCounter].view_text);
+        joeEventButtons(morningEvents[joesEventsCounter]);
+    }
 
-            displayActionOne(res.data[0].button_one)
-        } else if (!(actionOneText.classList.contains(`hide`))) {
-            actionOneText.classList.add(`hide`);
-            actionOneBtn.classList.add(`hide`);
-        }
+    if (timeOfDay === 'Noon') {    
+        joesEventID = noonEvents[joesEventsCounter].joe_event_id;
+        getView(noonEvents[joesEventsCounter].view_text);
+        joeEventButtons(noonEvents[joesEventsCounter]);
+    }
 
-        if (res.data[0].hasOwnProperty(`button_two`)) {
-            actionTwoText.classList.remove(`hide`);
-            actionTwoBtn.classList.remove(`hide`);
+    if (timeOfDay === 'Evening') {    
+        joesEventID = eveningEvents[joesEventsCounter].joe_event_id;
+        getView(eveningEvents[joesEventsCounter].view_text);
+        joeEventButtons(eveningEvents[joesEventsCounter]);
+    }
 
-            displayActionTwo(res.data[0].button_two)
-        } else if (!(actionTwoText.classList.contains(`hide`))) {
-            actionTwoText.classList.add(`hide`);
-            actionTwoBtn.classList.add(`hide`);
-        }
+    displayActionNumber(actionNumber);
+}
 
-        if (res.data[0].hasOwnProperty(`button_three`)) {
-            actionThreeText.classList.remove(`hide`);
-            actionThreeBtn.classList.remove(`hide`);
+function joeEventButtons(event) {
+    if (event.hasOwnProperty(`button_one`)) {
+        actionOneText.classList.remove(`hide`);
+        actionOneBtn.classList.remove(`hide`);
 
-            displayActionThree(res.data[0].button_three)
-        } else if (!(actionThreeText.classList.contains(`hide`))) {
-            actionThreeText.classList.add(`hide`);
-            actionThreeBtn.classList.add(`hide`);
-        }
+        displayActionOne(event.button_one)
+    } else if (!(actionOneText.classList.contains(`hide`))) {
+        actionOneText.classList.add(`hide`);
+        actionOneBtn.classList.add(`hide`);
+    }
 
-        if (res.data[0].hasOwnProperty(`button_four`)) {
-            actionFourText.classList.remove(`hide`);
-            actionFourBtn.classList.remove(`hide`);
+    if (event.hasOwnProperty(`button_two`)) {
+        actionTwoText.classList.remove(`hide`);
+        actionTwoBtn.classList.remove(`hide`);
 
-            displayActionFour(res.data[0].button_four)
-        } else if (!(actionFourText.classList.contains(`hide`))) {
-            actionFourText.classList.add(`hide`);
-            actionFourBtn.classList.add(`hide`);
-        }
+        displayActionTwo(event.button_two)
+    } else if (!(actionTwoText.classList.contains(`hide`))) {
+        actionTwoText.classList.add(`hide`);
+        actionTwoBtn.classList.add(`hide`);
+    }
 
-        if (res.data[0].hasOwnProperty(`button_five`)) {
-            actionFiveText.classList.remove(`hide`);
-            actionFiveBtn.classList.remove(`hide`);
+    if (event.hasOwnProperty(`button_three`)) {
+        actionThreeText.classList.remove(`hide`);
+        actionThreeBtn.classList.remove(`hide`);
 
-            displayActionFive(res.data[0].button_five)
-        } else if (!(actionFiveText.classList.contains(`hide`))) {
-            actionFiveText.classList.add(`hide`);
-            actionFiveBtn.classList.add(`hide`);
-        }
+        displayActionThree(event.button_three)
+    } else if (!(actionThreeText.classList.contains(`hide`))) {
+        actionThreeText.classList.add(`hide`);
+        actionThreeBtn.classList.add(`hide`);
+    }
 
-        if (actionNumber === 0) {
-            actionNumber = 3;
-        }
-        
-        displayActionNumber(actionNumber);
-    })
+    if (event.hasOwnProperty(`button_four`)) {
+        actionFourText.classList.remove(`hide`);
+        actionFourBtn.classList.remove(`hide`);
+
+        displayActionFour(event.button_four)
+    } else if (!(actionFourText.classList.contains(`hide`))) {
+        actionFourText.classList.add(`hide`);
+        actionFourBtn.classList.add(`hide`);
+    }
+
+    if (event.hasOwnProperty(`button_five`)) {
+        actionFiveText.classList.remove(`hide`);
+        actionFiveBtn.classList.remove(`hide`);
+
+        displayActionFive(event.button_five)
+    } else if (!(actionFiveText.classList.contains(`hide`))) {
+        actionFiveText.classList.add(`hide`);
+        actionFiveBtn.classList.add(`hide`);
+    }
+
+    // Resets action counter if need be.
+    if (actionNumber === 0) {
+        actionNumber = 3;
+    }
+}
+
+function updateEventID() {
+    let body = {
+        id: joesEventID
+    }
+    axios.put(`${baseURL}/update`, body)
+    .then()
     .catch(err => console.log(err));
 }
 
 function displayOutcome(num, event) {
     joesHealth(num);
-    
-    if (mHealthNumber <= 80) {
-        axios.get(`${baseURL}/low-menatal-Health`)
-        .then()
-        .catch(err => console.log(err));
-    }
+
     axios.get(`${baseURL}/outcome`)
         .then(res => {
             getView(`<br><br>${res.data[event].response}`)
@@ -414,7 +538,13 @@ function displayOutcome(num, event) {
 }
 
 function displayTravelerEvent(traveler) {
-    viewText.innerHTML = traveler.interrogate_traveler;
+    viewText.innerHTML = `Name: ${traveler.name}
+                      <br>Age: ${traveler.age}
+                      <br>Height: ${traveler.height}
+                      <br>Weight: ${traveler.weight}`;
+
+    getView(`<br><br> ${traveler.interrogate_traveler}`);
+
     displayActionOne('Inspect Features?');
 
     displayActionTwo('Inspect Clothing?');
@@ -435,61 +565,298 @@ function displayTravelerEvent(traveler) {
     // console.log(travelerID);
 }
 
+// Deletes good, evil, unsure, and all travelers maybe
+function deleteAllSavedLists() {
+    axios.delete(`${baseURL}/all-travelers`)
+    .then()
+    .catch(err => console.log(err));
+}
 
 const buttonOneSubmit = debounce(function() {
     if (actionOneText.innerHTML === 'Start') {
         eventsCounter++;
-
+        console.log(`Beginning - Event counter: `, eventsCounter);
+        console.log(`Beginning - easy travelers: `, easyTravelers);
         // Then we display Joe's event.
         refreshJoeEvent();
         return;
     }
     if (actionNumber > 0) {
         switch (eventsCounter) {
+            // Morning Joe Event
             case 1:
-                score -= 2;
-                displayOutcome(10, 0);
+                updateEventID();
+                switch (joesEventID) {
+                    case 1:
+                        score -= 2;
+                        displayOutcome(10, 0);
+                        break;
+                    case 2:
+                        score -= 2;
+                        displayOutcome(10, 0);
+                        break;
+                    case 3:
+                        score -= 2;
+                        displayOutcome(10, 0);
+                        break;
+                    default:
+                        break;
+                }
                 break;
+            // Morning Event 1
             case 2:
-                actionNumber--; 
-                askForHelp++;
+                actionNumber--;
+
+                if (askForHelp === 0 && !asked) {
+                    askForHelp++;
+                }
+
                 if(!(actionOneText.classList.contains(`hide`))) {
                     actionOneText.classList.add(`hide`);
                     actionOneBtn.classList.add(`hide`);
                 }
                 getView(`<br><br>${easyTravelers[travelerCounter].inspect_features}`);
                 break;
-            case 2.5:
-                break;
+            // Morning Event 2
             case 3:
-                console.log(eventsCounter);
+                actionNumber--; 
+
+                if (askForHelp === 0 && !asked) {
+                    askForHelp++;
+                }
+
+                if(!(actionOneText.classList.contains(`hide`))) {
+                    actionOneText.classList.add(`hide`);
+                    actionOneBtn.classList.add(`hide`);
+                }
+                getView(`<br><br>${easyTravelers[travelerCounter].inspect_features}`);
                 break;
+            // Morning Event 3
             case 4:
-                console.log(eventsCounter);
+                actionNumber--; 
+                
+                if (askForHelp === 0 && !asked) {
+                    askForHelp++;
+                }
+                
+                if(!(actionOneText.classList.contains(`hide`))) {
+                    actionOneText.classList.add(`hide`);
+                    actionOneBtn.classList.add(`hide`);
+                }
+                getView(`<br><br>${easyTravelers[travelerCounter].inspect_features}`);
                 break;
+            // Noon
+            case 4.5:
+                if (actionOneText.innerHTML === 'Continue?') {
+                    eventsCounter += 0.5;
+                    timeOfDay = 'Noon';
+                    // displayDayNumber();
+                    refreshJoeEvent();
+                    break;
+                }
+                break;
+            // Noon Joe Event 1
             case 5:
-                console.log(eventsCounter);
+                updateEventID();
+                switch (joesEventID) {
+                    case 4:
+                        score -= 2;
+                        displayOutcome(10, 0);
+                        break;
+                    case 5:
+                        score += 2;
+                        displayOutcome(-10, 0);
+                        break;
+                    case 6:
+                        score -= 2;
+                        displayOutcome(10, 0);
+                        break;
+                    default:
+                        break;
+                }
                 break;
-            // May not need the below for all buttons...
+            // Noon Event 1
             case 6:
-                console.log(eventsCounter);
+                actionNumber--;
+
+                if (askForHelp === 0 && !asked) {
+                    askForHelp++;
+                }
+
+                if(!(actionOneText.classList.contains(`hide`))) {
+                    actionOneText.classList.add(`hide`);
+                    actionOneBtn.classList.add(`hide`);
+                }
+                getView(`<br><br>${mediumTravelers[travelerCounter].inspect_features}`);
                 break;
+            // Noon Event 2
             case 7:
-                console.log(eventsCounter);
+                actionNumber--; 
+
+                if (askForHelp === 0 && !asked) {
+                    askForHelp++;
+                }
+
+                if(!(actionOneText.classList.contains(`hide`))) {
+                    actionOneText.classList.add(`hide`);
+                    actionOneBtn.classList.add(`hide`);
+                }
+                getView(`<br><br>${mediumTravelers[travelerCounter].inspect_features}`);
                 break;
+            // Noon Event 3
             case 8:
-                console.log(eventsCounter);
+                actionNumber--; 
+                
+                if (askForHelp === 0 && !asked) {
+                    askForHelp++;
+                }
+                
+                if(!(actionOneText.classList.contains(`hide`))) {
+                    actionOneText.classList.add(`hide`);
+                    actionOneBtn.classList.add(`hide`);
+                }
+                getView(`<br><br>${mediumTravelers[travelerCounter].inspect_features}`);
                 break;
+            // Evening
+            case 8.5:
+                if (actionOneText.innerHTML === 'Continue?') {
+                    eventsCounter += 0.5;
+                    timeOfDay = 'Evening';
+                    // displayDayNumber();
+                    refreshJoeEvent();
+                    break;
+                }
+                break;
+            // Evening Joe Event
             case 9:
-                console.log(eventsCounter);
+                console.log(`Case: `, eventsCounter);
+                updateEventID();
+                console.log(`JoesEvent ID: `, joesEventID);
+                switch (joesEventID) {
+                    case 7:
+                        score -= 1;
+                        displayOutcome(5, 0);
+                        break;
+                    case 8:
+                        score -= 1;
+                        displayOutcome(5, 0);
+                        break;
+                    case 9:
+                        score -= 1;
+                        displayOutcome(5, 0);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            // Evening Event 1
+            case 10:
+                actionNumber--;
+
+                if (askForHelp === 0 && !asked) {
+                    askForHelp++;
+                }
+
+                if (travelerID === 8) {
+                    sCounter++;
+                }
+
+                if(!(actionOneText.classList.contains(`hide`))) {
+                    actionOneText.classList.add(`hide`);
+                    actionOneBtn.classList.add(`hide`);
+                }
+                getView(`<br><br>${hardTravelers[travelerCounter].inspect_features}`);
+                break;
+            // Evening Event 2
+            case 11:
+                actionNumber--; 
+
+                if (askForHelp === 0 && !asked) {
+                    askForHelp++;
+                }
+
+                if (travelerID === 8) {
+                    sCounter++;
+                }
+
+                if(!(actionOneText.classList.contains(`hide`))) {
+                    actionOneText.classList.add(`hide`);
+                    actionOneBtn.classList.add(`hide`);
+                }
+                getView(`<br><br>${hardTravelers[travelerCounter].inspect_features}`);
+                break;
+            // Evening Event 3
+            case 12:
+                actionNumber--; 
+                
+                if (askForHelp === 0 && !asked) {
+                    askForHelp++;
+                }
+
+                if (travelerID === 8) {
+                    sCounter++;
+                }
+                
+                if(!(actionOneText.classList.contains(`hide`))) {
+                    actionOneText.classList.add(`hide`);
+                    actionOneBtn.classList.add(`hide`);
+                }
+                getView(`<br><br>${hardTravelers[travelerCounter].inspect_features}`);
+                break;
+            // End
+            case 12.5:
+                if (actionOneText.innerHTML === 'Continue?') {
+                    eventsCounter += 0.5;
+                    actionNumber = 1;
+                    timeOfDay = 'END';
+                    displayActionNumber;
+                    // displayDayNumber();
+                    clearView();
+
+                    if (actionTwoText.classList.contains(`hide`)) {
+                        actionTwoText.classList.remove(`hide`);
+                        actionTwoBtn.classList.remove(`hide`);
+                    }
+                    asked = true;
+                    checkedSpecial = true;
+
+                    getView(`Congrats! You've reached the end!<br><br>You scored a ${score + hiddenScore} for your day in the life of Joe!`);
+
+                    getView(`<br><br> For the ones that you put into unsure, we have provided you with the proper scoring adjustments already. Unfortunately, for fairness' sake, we will not be showing if you they are good or evil travelers.`)
+
+                    actionOneText.innerHTML = `Restart?`;
+                    actionTwoText.innerHTML = `Quit?`;
+                    break;
+                }
+                break;
+            case 13:
+                if (!(actionTwoText.classList.contains(`hide`))) {
+                    actionTwoText.classList.add(`hide`);
+                    actionTwoBtn.classList.add(`hide`);
+                }
+                restart();
+                deleteAllSavedLists();
+                joesHealth(-100);
+                clearView();
+                start();
+                getGoodDisplay();
+                getEvilDisplay();
+                getUnsureDisplay();
                 break;
             default:
 
                 // We increment our counters appropriately.
                 eventsCounter += 0.5;
-                travelerCounter++;
+                travelerCounter++
+
+                if (travelerCounter > 2) {
+                    travelersToday++;
+                    travelerCounter = 0;
+                }
 
                 // We also need to refresh the action counter.
+                askForHelp = 0;
+                sCounter = 0;
                 actionNumber = 3;
                 displayActionNumber();
 
@@ -499,7 +866,21 @@ const buttonOneSubmit = debounce(function() {
 
                 // This displays the next traveler's opening encounter.
                 clearView();
-                displayTravelerEvent(easyTravelers[travelerCounter]);
+
+                if (travelersToday === 0) {
+                    displayTravelerEvent(easyTravelers[travelerCounter]);
+                    travelerID = easyTravelers[travelerCounter].traveler_id;
+                }
+                if (travelersToday === 1) {
+                    displayTravelerEvent(mediumTravelers[travelerCounter]);
+                    travelerID = mediumTravelers[travelerCounter].traveler_id;
+                }
+                if (travelersToday === 2) {
+                    displayTravelerEvent(hardTravelers[travelerCounter]);
+                    travelerID = hardTravelers[travelerCounter].traveler_id;
+                }
+                console.log(`Case: `, eventsCounter);
+                console.log(`Traveler Count: `, travelerCounter);
                 break;
         }
     }
@@ -508,39 +889,226 @@ const buttonOneSubmit = debounce(function() {
 const buttonTwoSubmit = debounce(function() {
     switch (eventsCounter) {
         case 1:
-            score += 2;
-            displayOutcome(-10, 1);
+            updateEventID();
+            switch (joesEventID) {
+                case 1:
+                    score += 2;
+                    displayOutcome(-10, 1);
+                    break;
+                case 2:
+                    score += 2;
+                    displayOutcome(-10, 1);
+                    break;
+                case 3:
+                    score -= 1;
+                    displayOutcome(5, 1);
+                    break;
+                default:
+                    break;
+            }
             break;
+        // Morning Event 1
         case 2:
-            actionNumber--; 
-            askForHelp++;
-            if(!(actionOneText.classList.contains(`hide`))) {
-                actionOneText.classList.add(`hide`);
-                actionOneBtn.classList.add(`hide`);
+            actionNumber--;
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+            
+            if(!(actionTwoText.classList.contains(`hide`))) {
+                actionTwoText.classList.add(`hide`);
+                actionTwoBtn.classList.add(`hide`);
             }
             getView(`<br><br>${easyTravelers[travelerCounter].inspect_clothing}`);
             break;
+        // Morning Event 2
         case 3:
-            console.log(eventsCounter);
+            actionNumber--; 
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+            
+            if(!(actionTwoText.classList.contains(`hide`))) {
+                actionTwoText.classList.add(`hide`);
+                actionTwoBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${easyTravelers[travelerCounter].inspect_clothing}`);
             break;
+        // Morning Event 3
         case 4:
-            console.log(eventsCounter);
+            actionNumber--; 
+            
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+            
+            if(!(actionTwoText.classList.contains(`hide`))) {
+                actionTwoText.classList.add(`hide`);
+                actionTwoBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${easyTravelers[travelerCounter].inspect_clothing}`);
             break;
+        // Noon Joe Event 1
         case 5:
-            console.log(eventsCounter);
+            console.log(`Noon Joe Event`);
+            console.log(`Case: `, eventsCounter);
+            updateEventID();
+            console.log(`JoesEvent ID: `, joesEventID);
+            switch (joesEventID) {
+                case 4:
+                    score -= 1;
+                    displayOutcome(5, 1);
+                    break;
+                case 5:
+                    score -= 1;
+                    displayOutcome(5, 1);
+                    break;
+                case 6:
+                    score -= 1;
+                    displayOutcome(5, 1);
+                    break;
+                default:
+                    break;
+            }
             break;
+        // Noon Event 1
         case 6:
-            console.log(eventsCounter);
+            actionNumber--;
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 5) {
+                sCounter++;
+            }
+
+            if(!(actionTwoText.classList.contains(`hide`))) {
+                actionTwoText.classList.add(`hide`);
+                actionTwoBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${mediumTravelers[travelerCounter].inspect_clothing}`);
             break;
-        // May not need the below for all buttons...
+        // Noon Event 2
         case 7:
-            console.log(eventsCounter);
+            actionNumber--; 
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 5) {
+                sCounter++;
+            }
+
+            if(!(actionTwoText.classList.contains(`hide`))) {
+                actionTwoText.classList.add(`hide`);
+                actionTwoBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${mediumTravelers[travelerCounter].inspect_clothing}`);
             break;
+        // Noon Event 3
         case 8:
-            console.log(eventsCounter);
+            actionNumber--; 
+            
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 5) {
+                sCounter++;
+            }
+            
+            if(!(actionTwoText.classList.contains(`hide`))) {
+                actionTwoText.classList.add(`hide`);
+                actionTwoBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${mediumTravelers[travelerCounter].inspect_clothing}`);
             break;
+        // Evening Joe Event
         case 9:
-            console.log(eventsCounter);
+            console.log(`Case: `, eventsCounter);
+            updateEventID();
+            console.log(`JoesEvent ID: `, joesEventID);
+            switch (joesEventID) {
+                case 7:
+                    score -= 2;
+                    displayOutcome(10, 1);
+                    break;
+                case 8:
+                    score += 2;
+                    displayOutcome(-10, 1);
+                    break;
+                case 9:
+                    score += 2;
+                    displayOutcome(-10, 1);
+                    break;
+                default:
+                    break;
+            }
+            break;
+        // Evening Event 1
+        case 10:
+            actionNumber--;
+            
+            if (travelerID === 12) {
+                sCounter++;
+            }
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if(!(actionTwoText.classList.contains(`hide`))) {
+                actionTwoText.classList.add(`hide`);
+                actionTwoBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${hardTravelers[travelerCounter].inspect_clothing}`);
+            break;
+        // Evening Event 2
+        case 11:
+            actionNumber--; 
+            
+            if (travelerID === 12) {
+                sCounter++;
+            }
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if(!(actionTwoText.classList.contains(`hide`))) {
+                actionTwoText.classList.add(`hide`);
+                actionTwoBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${hardTravelers[travelerCounter].inspect_clothing}`);
+            break;
+        // Evening Event 3
+        case 12:
+            actionNumber--; 
+            
+            if (travelerID === 12) {
+                sCounter++;
+            }
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+            
+            if(!(actionTwoText.classList.contains(`hide`))) {
+                actionTwoText.classList.add(`hide`);
+                actionTwoBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${hardTravelers[travelerCounter].inspect_clothing}`);
+            break;
+        // End
+        case 13:
+            close();
+            deleteAllSavedLists();
+            joesHealth(-100);
+            clearView();
+            server.close();
             break;
         default:
             break;
@@ -550,44 +1118,230 @@ const buttonTwoSubmit = debounce(function() {
 const buttonThreeSubmit = debounce(function() {
     switch (eventsCounter) {
         case 1:
-            score -= 1;
-            displayOutcome(5, 2);
-            break;
-        case 2:
-            if (travelerID === 1 || travelerID === 2 || travelerID === 3) {
-                sCounter++;
-                console.log(sCounter);
+            updateEventID();
+            switch (joesEventID) {
+                case 1:
+                    score -= 1;
+                    displayOutcome(5, 2);
+                    break;
+                case 2:
+                    score -= 2;
+                    displayOutcome(10, 2);
+                    break;
+                case 3:
+                    score += 2;
+                    displayOutcome(-10, 2);
+                    break;
+                default:
+                    break;
             }
+            break;
+        // Morning Event 1
+        case 2:
             actionNumber--;
-            askForHelp++;
-            if(!(actionOneText.classList.contains(`hide`))) {
-                actionOneText.classList.add(`hide`);
-                actionOneBtn.classList.add(`hide`);
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 1 || travelerID === 2 || travelerID === 3 || travelerID === 10) {
+                sCounter++;
+            }
+
+            if(!(actionThreeText.classList.contains(`hide`))) {
+                actionThreeText.classList.add(`hide`);
+                actionThreeBtn.classList.add(`hide`);
             }
             getView(`<br><br>${easyTravelers[travelerCounter].inspect_wares}`);
             break;
+        // Morning Event 2
         case 3:
-            displayOutcome(5, 2);
-            console.log(eventsCounter);
+            actionNumber--; 
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 1 || travelerID === 2 || travelerID === 3 || travelerID === 10) {
+                sCounter++;
+            }
+
+            if(!(actionThreeText.classList.contains(`hide`))) {
+                actionThreeText.classList.add(`hide`);
+                actionThreeBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${easyTravelers[travelerCounter].inspect_wares}`);
             break;
+        // Morning Event 3
         case 4:
-            console.log(eventsCounter);
+            actionNumber--; 
+            
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 1 || travelerID === 2 || travelerID === 3 || travelerID === 10) {
+                sCounter++;
+            }
+
+            if(!(actionThreeText.classList.contains(`hide`))) {
+                actionThreeText.classList.add(`hide`);
+                actionThreeBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${easyTravelers[travelerCounter].inspect_wares}`);
             break;
+        // Noon Joe Event 1
         case 5:
-            console.log(eventsCounter);
+            console.log(`Noon Joe Event`);
+            console.log(`Case: `, eventsCounter);
+            updateEventID();
+            console.log(`JoesEvent ID: `, joesEventID);
+            switch (joesEventID) {
+                case 4:
+                    score += 2;
+                    displayOutcome(-10, 2);
+                    break;
+                case 5:
+                    score -= 2;
+                    displayOutcome(10, 2);
+                    break;
+                case 6:
+                    score += 2;
+                    displayOutcome(-10, 2);
+                    break;
+                default:
+                    break;
+            }
             break;
+        // Noon Event 1
         case 6:
-            console.log(eventsCounter);
+            actionNumber--;
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 5 || travelerID === 11) {
+                sCounter++;
+            }
+
+            if(!(actionThreeText.classList.contains(`hide`))) {
+                actionThreeText.classList.add(`hide`);
+                actionThreeBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${mediumTravelers[travelerCounter].inspect_wares}`);
             break;
-        // May not need the below for all buttons...
+        // Noon Event 2
         case 7:
-            console.log(eventsCounter);
+            actionNumber--; 
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 5 || travelerID === 11) {
+                sCounter++;
+            }
+
+            if(!(actionThreeText.classList.contains(`hide`))) {
+                actionThreeText.classList.add(`hide`);
+                actionThreeBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${mediumTravelers[travelerCounter].inspect_wares}`);
             break;
+        // Noon Event 3
         case 8:
-            console.log(eventsCounter);
+            actionNumber--; 
+            
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 5 || travelerID === 11) {
+                sCounter++;
+            }
+            
+            if(!(actionThreeText.classList.contains(`hide`))) {
+                actionThreeText.classList.add(`hide`);
+                actionThreeBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${mediumTravelers[travelerCounter].inspect_wares}`);
             break;
+        // Evening Joe Event
         case 9:
-            console.log(eventsCounter);
+            console.log(`Case: `, eventsCounter);
+            updateEventID();
+            console.log(`JoesEvent ID: `, joesEventID);
+            switch (joesEventID) {
+                case 7:
+                    score += 2;
+                    displayOutcome(-10, 2);
+                    break;
+                case 8:
+                    score -= 2;
+                    displayOutcome(10, 2);
+                    break;
+                case 9:
+                    score += 2;
+                    displayOutcome(-10, 2);
+                    break;
+                default:
+                    break;
+            }
+            break;
+        // Evening Event 1
+        case 10:
+            actionNumber--;
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 7 || travelerID === 8 || travelerID === 9 || travelerID === 12) {
+                sCounter++;
+            }
+
+            if(!(actionThreeText.classList.contains(`hide`))) {
+                actionThreeText.classList.add(`hide`);
+                actionThreeBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${hardTravelers[travelerCounter].inspect_wares}`);
+            break;
+        // Evening Event 2
+        case 11:
+            actionNumber--; 
+
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 7 || travelerID === 8 || travelerID === 9 || travelerID === 12) {
+                sCounter++;
+            }
+
+            if(!(actionThreeText.classList.contains(`hide`))) {
+                actionThreeText.classList.add(`hide`);
+                actionThreeBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${hardTravelers[travelerCounter].inspect_wares}`);
+            break;
+        // Evening Event 3
+        case 12:
+            actionNumber--; 
+            
+            if (askForHelp === 0 && !asked) {
+                askForHelp++;
+            }
+
+            if (travelerID === 7 || travelerID === 8 || travelerID === 9 || travelerID === 12) {
+                sCounter++;
+            }
+            
+            if(!(actionThreeText.classList.contains(`hide`))) {
+                actionThreeText.classList.add(`hide`);
+                actionThreeBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${hardTravelers[travelerCounter].inspect_wares}`);
             break;
         default:
             break;
@@ -596,25 +1350,113 @@ const buttonThreeSubmit = debounce(function() {
 
 const buttonFourSubmit = debounce(function() {
     switch (eventsCounter) {
+        // Morning Event 1
         case 2:
-            if (travelerID === 3) {
-                sCounter++;
+            actionNumber--;
+
+            if (travelerID === 2 || travelerID === 3 || travelerID === 4) {
+                sCounter++
             }
-            actionNumber--; 
-            if(!(actionOneText.classList.contains(`hide`))) {
-                actionOneText.classList.add(`hide`);
-                actionOneBtn.classList.add(`hide`);
-            }
+
+            asked = true;
+
             getView(`<br><br>${easyTravelers[travelerCounter].ask_for_help}`);
             break;
+        // Morning Event 2
         case 3:
-            console.log(eventsCounter);
+            actionNumber--; 
+
+            if (travelerID === 2 || travelerID === 3 || travelerID === 4) {
+                sCounter++
+            }
+
+            asked = true;
+            
+            getView(`<br><br>${easyTravelers[travelerCounter].ask_for_help}`);
             break;
+        // Morning Event 3
         case 4:
-            console.log(eventsCounter);
+            actionNumber--;
+
+            if (travelerID === 2 || travelerID === 3 || travelerID === 4) {
+                sCounter++
+            }
+            
+            asked = true;
+
+            getView(`<br><br>${easyTravelers[travelerCounter].ask_for_help}`);
             break;
-        case 5:
-            console.log(eventsCounter);
+        // Noon Event 1
+        case 6:
+            actionNumber--;
+
+            if (travelerID === 11) {
+                sCounter++;
+            }
+
+            asked = true;
+
+            getView(`<br><br>${mediumTravelers[travelerCounter].ask_for_help}`);
+            break;
+        // Noon Event 2
+        case 7:
+            actionNumber--;
+
+            if (travelerID === 11) {
+                sCounter++;
+            }
+
+            asked = true;
+
+            getView(`<br><br>${mediumTravelers[travelerCounter].ask_for_help}`);
+            break;
+        // Noon Event 3
+        case 8:
+            actionNumber--;
+
+            if (travelerID === 11) {
+                sCounter++;
+            }
+
+            asked = true;
+
+            getView(`<br><br>${mediumTravelers[travelerCounter].ask_for_help}`);
+            break;
+        // Evening Event 1
+        case 10:
+            actionNumber--;
+
+            if (travelerID === 7 || travelerID === 9) {
+                sCounter++;
+            }
+
+            asked = true;
+
+            getView(`<br><br>${hardTravelers[travelerCounter].ask_for_help}`);
+            break;
+        // Evening Event 2
+        case 11:
+            actionNumber--;
+
+            if (travelerID === 7 || travelerID === 9) {
+                sCounter++;
+            }
+
+            asked = true;
+
+            getView(`<br><br>${hardTravelers[travelerCounter].ask_for_help}`);
+            break;
+        // Evening Event 3
+        case 12:
+            actionNumber--;
+
+            if (travelerID === 7 || travelerID === 9) {
+                sCounter++;
+            }
+
+            asked = true;
+            
+            getView(`<br><br>${hardTravelers[travelerCounter].ask_for_help}`);
             break;
         default:
             break;
@@ -623,22 +1465,104 @@ const buttonFourSubmit = debounce(function() {
 
 const buttonFiveSubmit = debounce(function() {
     switch (eventsCounter) {
+        // Morning Event 1
         case 2:
             actionNumber--; 
-            if(!(actionOneText.classList.contains(`hide`))) {
-                actionOneText.classList.add(`hide`);
-                actionOneBtn.classList.add(`hide`);
+            checkedSpecial = true;
+
+            if(!(actionFiveText.classList.contains(`hide`))) {
+                actionFiveText.classList.add(`hide`);
+                actionFiveBtn.classList.add(`hide`);
             }
             getView(`<br><br>${easyTravelers[travelerCounter].inspect_special}`);
             break;
+        // Morning Event 2
         case 3:
-            console.log(eventsCounter);
+            actionNumber--; 
+            checkedSpecial = true;
+
+            if(!(actionFiveText.classList.contains(`hide`))) {
+                actionFiveText.classList.add(`hide`);
+                actionFiveBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${easyTravelers[travelerCounter].inspect_special}`);
             break;
+        // Morning Event 3
         case 4:
-            console.log(eventsCounter);
+            actionNumber--; 
+            checkedSpecial = true;
+
+            if(!(actionFiveText.classList.contains(`hide`))) {
+                actionFiveText.classList.add(`hide`);
+                actionFiveBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${easyTravelers[travelerCounter].inspect_special}`);
             break;
-        case 5:
-            console.log(eventsCounter);
+        // Noon Event 1
+        case 6:
+            actionNumber--; 
+            checkedSpecial = true;
+
+            if(!(actionFiveText.classList.contains(`hide`))) {
+                actionFiveText.classList.add(`hide`);
+                actionFiveBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${mediumTravelers[travelerCounter].inspect_special}`);
+            break;
+        // Noon Event 2
+        case 7:
+            actionNumber--; 
+            checkedSpecial = true;
+
+            if(!(actionFiveText.classList.contains(`hide`))) {
+                actionFiveText.classList.add(`hide`);
+                actionFiveBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${mediumTravelers[travelerCounter].inspect_special}`);
+            break;
+        // Noon Event 3
+        case 8:
+            actionNumber--; 
+            checkedSpecial = true;
+
+            if(!(actionFiveText.classList.contains(`hide`))) {
+                actionFiveText.classList.add(`hide`);
+                actionFiveBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${mediumTravelers[travelerCounter].inspect_special}`);
+            break;
+        // Evening Event 1
+        case 10:
+            actionNumber--; 
+            checkedSpecial = true;
+
+            if(!(actionFiveText.classList.contains(`hide`))) {
+                actionFiveText.classList.add(`hide`);
+                actionFiveBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${hardTravelers[travelerCounter].inspect_special}`);
+            break;
+        // Evening Event 2
+        case 11:
+            actionNumber--; 
+            checkedSpecial = true;
+
+            if(!(actionFiveText.classList.contains(`hide`))) {
+                actionFiveText.classList.add(`hide`);
+                actionFiveBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${hardTravelers[travelerCounter].inspect_special}`);
+            break;
+        // Evening Event 3
+        case 12:
+            actionNumber--; 
+            checkedSpecial = true;
+
+            if(!(actionFiveText.classList.contains(`hide`))) {
+                actionFiveText.classList.add(`hide`);
+                actionFiveBtn.classList.add(`hide`);
+            }
+            getView(`<br><br>${hardTravelers[travelerCounter].inspect_special}`);
             break;
         default:
             break;
@@ -648,21 +1572,18 @@ const buttonFiveSubmit = debounce(function() {
 function getGoodDisplay() {
     axios.get(`${baseURL}/good-travelers-list`)
     .then(res => {
-        console.log(res.data)
-
         let list = res.data;
         let count = 0;
+        goodView.innerHTML = '';
         while (count < list.length) {
-            console.log(list[count].name);
-            goodView.innerHTML += `<br>${list[count].name}`
+            goodView.innerHTML += `<br>${list[count].name}`;
             count++;
         }
     })
     .catch(err => console.log(err));
 }
 
-const addToGood = debounce(function() {
-    eventsCounter++;
+function addToGood() {
 
     let body = {
         id: travelerID
@@ -670,24 +1591,38 @@ const addToGood = debounce(function() {
 
     axios.post(`${baseURL}/good-travelers`, body)
     .then(res => {
-        getGoodDisplay();
-        eventsCounter += 0.5;
+        asked = false;
+        checkedSpecial = false;
 
-        // let display = allTravelers.includes(travelerID);
-        // viewText.innerHTML = `You place ${display}`;
+        getGoodDisplay();
+
+        let traveler = allTravelers.find(({ traveler_id }) => traveler_id === travelerID);
+        viewText.innerHTML = `You let ${traveler.name} through the gates.`;
+        continueBtn()
+
+        // Update the mental health based on decision made.
+        if (traveler.good === false) {
+            score--;
+            joesHealth(2);
+        } else {
+            score += 2;
+        }
+
+        // To reset the number of actions for the continue section.
+        actionNumber = 1;
+        displayActionNumber();
+        eventsCounter += 0.5;
     })
     .catch(err => console.log(err));
-}, 200);
+}
 
 function getEvilDisplay() {
     axios.get(`${baseURL}/evil-travelers-list`)
     .then(res => {
-        console.log(res.data)
-
         let list = res.data;
         let count = 0;
+        evilView.innerHTML = '';
         while (count < list.length) {
-            console.log(list[count].name);
             evilView.innerHTML += `<br>${list[count].name}`
             count++;
         }
@@ -696,7 +1631,6 @@ function getEvilDisplay() {
 }
 
 const addToEvil = debounce(function() {
-    eventsCounter++;
 
     let body = {
         id: travelerID
@@ -704,21 +1638,39 @@ const addToEvil = debounce(function() {
 
     axios.post(`${baseURL}/evil-travelers`, body)
     .then(res => {
+        asked = false;
+        checkedSpecial = false;
+
         getEvilDisplay();
+
+        let traveler = allTravelers.find(({ traveler_id }) => traveler_id === travelerID)
+        viewText.innerHTML = `You send ${traveler.name} to jail as a criminal.`;
+        continueBtn();
+
+        // Update the mental health based on decision made.
+        if (traveler.good === true) {
+            score--;
+            joesHealth(2);
+        } else {
+            score += 2;
+        }
+
+        // To reset the number of actions for the continue section.
+        actionNumber = 1;
+        displayActionNumber();
         eventsCounter += 0.5;
     })
     .catch(err => console.log(err));
 }, 200);
 
 function getUnsureDisplay() {
+
     axios.get(`${baseURL}/unsure-travelers-list`)
     .then(res => {
-        console.log(res.data)
-
         let list = res.data;
         let count = 0;
+        unsureView.innerHTML = '';
         while (count < list.length) {
-            console.log(list[count].name);
             unsureView.innerHTML += `<br>${list[count].name}`
             count++;
         }
@@ -727,7 +1679,6 @@ function getUnsureDisplay() {
 }
 
 const addToUnsure = debounce(function() {
-    eventsCounter++;
 
     let body = {
         id: travelerID
@@ -735,20 +1686,35 @@ const addToUnsure = debounce(function() {
 
     axios.post(`${baseURL}/unsure-travelers`, body)
     .then(res => {
+        asked = false;
+        checkedSpecial = false;
+
         getUnsureDisplay();
+        
+        let traveler = allTravelers.find(({ traveler_id }) => traveler_id === travelerID).name;
+        viewText.innerHTML = `You hold ${traveler} in the back room for questioning.`;
+        continueBtn()
+
+        // Update the mental health and score based on decision made.
+        if (traveler.good === true) {
+            hiddenScore++;
+            joesHealth(1);
+        } else if (traveler.good === false) {
+            hiddenScore--;
+            joesHealth(1);
+        }
+
+        // To reset the number of actions for the continue section.
+        actionNumber = 1;
+        displayActionNumber();
         eventsCounter += 0.5;
     })
     .catch(err => console.log(err));
 }, 200);
 
-start();
-
-const test = debounce(function() {
-
-}, 200);
-
+setTimeout(start(),2000);
 if (btnOneUsed === false) {
-    actionOneBtn.addEventListener(`click`, test);
+    actionOneBtn.addEventListener(`click`, buttonOneSubmit);
 }
 if (btnTwoUsed === false) {
     actionTwoBtn.addEventListener(`click`, buttonTwoSubmit);

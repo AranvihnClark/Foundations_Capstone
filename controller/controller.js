@@ -11,7 +11,8 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
     }
 });
 
-let eventsID = 0;
+let eventID = 0;
+
 /*
                     ('name', age, 'occupation', good?, height, weight, 'difficulty',
                     'interrogate_traveler',
@@ -24,12 +25,10 @@ let eventsID = 0;
 */
 
 module.exports = {
-    nextJoeAction: (req, res) => {
-        eventsID++;
+    joesAction: (req, res) => {
         sequelize.query(`
             SELECT *
-            FROM joe_events
-            WHERE joe_event_id = ${eventsID};
+            FROM joe_events;
             `
         )
         .then(dbRes => res.status(200).send(dbRes[0]))
@@ -40,13 +39,17 @@ module.exports = {
         sequelize.query(`
             SELECT *
             FROM joe_event_responses
-            WHERE joe_event_id = ${eventsID}
+            WHERE joe_event_id = ${eventID};
         `)
         .then(dbRes => {
-            // console.log(dbRes[0]);
             return res.status(200).send(dbRes[0]);
         })
         .catch(err => console.log(err));
+    },
+
+    updateEventID: (req, res) => {
+        const { id }  = req.body;
+        eventID = id;
     },
 
     getTravelers: (req, res) => {
@@ -134,12 +137,30 @@ module.exports = {
         .catch(err => console.log(err));
     },
 
-    deleteUnsureTravelers: (req, res) => {
-
-    },
-
-    increaseJoeEventID: (req, res) => {
-        eventsID++;
+    deleteGEUTravelers: (req, res) => {
+        eventID = 0;
+        sequelize.query(`
+            DROP TABLE IF EXISTS good_travelers CASCADE;
+            DROP TABLE IF EXISTS evil_travelers CASCADE;
+            DROP TABLE IF EXISTS unsure_travelers CASCADE;
+            
+            CREATE TABLE good_travelers(
+                good_traveler_id SERIAL PRIMARY KEY,
+                traveler_id INT REFERENCES travelers(traveler_id)
+            );
+        
+            CREATE TABLE evil_travelers(
+                evil_traveler_id SERIAL PRIMARY KEY,
+                traveler_id INT REFERENCES travelers(traveler_id)
+            );
+        
+            CREATE TABLE unsure_travelers(
+                unsure_traveler_id SERIAL PRIMARY KEY,
+                traveler_id INT REFERENCES travelers(traveler_id)
+            );
+        `)
+        .then(dbRes => res.sendStatus(200))
+        .catch(err => console.log(err));
     },
 
     getJoe: (req, res) => {

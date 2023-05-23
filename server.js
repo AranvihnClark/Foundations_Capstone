@@ -7,7 +7,7 @@ const cors = require('cors');
 const { SERVER_PORT } = process.env;
 const { seed } = require('./controller/seed.js');
 const { 
-    nextJoeAction,
+    joesAction,
     outcome,
     getTravelers,
     getGoodTravelers, 
@@ -16,10 +16,10 @@ const {
     addGoodTravelers, 
     addEvilTravelers, 
     addUnsureTravelers, 
-    deleteUnsureTravelers,
+    deleteGEUTravelers,
     getJoe,
     updateJoe,
-    increaseJoeEventID,
+    updateEventID,
     newGame
     } = require('./controller/controller.js');
 
@@ -32,11 +32,14 @@ app.use(express.static(`${__dirname}/public`));
 // Dev
 app.post('/seed', seed);
 
+// To restart game
+app.delete('/all-travelers', deleteGEUTravelers);
+
 // Restart
 app.post('/new-game', newGame);
 
 // Actions
-app.get('/next-joe-action', nextJoeAction);
+app.get('/joes-action', joesAction);
 app.get('/outcome', outcome);
 
 // ***Travelers End Points***
@@ -54,14 +57,11 @@ app.post('/evil-travelers', addEvilTravelers);
 // Unsure Travelers
 app.get('/unsure-travelers-list', getUnsureTravelers);
 app.post('/unsure-travelers', addUnsureTravelers);
-app.delete('/unsure-travelers/:id', deleteUnsureTravelers);
 
 // ***Joe End Points***
 app.get('/joe', getJoe);
 app.put('/joe', updateJoe);
-
-// Not a real end point.
-app.get('/low-menatal-Health', increaseJoeEventID);
+app.put('/update', updateEventID);
 
 
 // ***Server***
