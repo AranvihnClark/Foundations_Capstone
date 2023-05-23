@@ -74,6 +74,8 @@ let mediumCheck = -1
 let hardCheck = -1;
 let unsureFilled = false;
 let travelersToday = 0;
+let misplacedTravelers = 0;
+let placedUnsure = [];
 
 // Buttons clicked?
 let btnOneUsed = false;
@@ -575,6 +577,12 @@ function deleteAllSavedLists() {
     .catch(err => console.log(err));
 }
 
+function restoreLists() {
+    axios.post(`${baseURL}/restore`)
+    .then()
+    .catch(err => console.log(err));
+}
+
 const buttonOneSubmit = debounce(function() {
     if (actionOneText.innerHTML === 'Start') {
         eventsCounter++;
@@ -820,9 +828,33 @@ const buttonOneSubmit = debounce(function() {
                     asked = true;
                     checkedSpecial = true;
 
-                    getView(`Congrats! You've reached the end!<br><br>You scored a ${score + hiddenScore + Math.floor(+mHealthNumber.innerHTML / 2)} for your day in the life of Joe!`);
+                    getView(`Congrats! You've reached the end!<br><br>You scored a ${score + hiddenScore + Math.floor(+mHealthNumber.innerHTML / 2)} for your day in the life of Joe!<br><br> For the ones that you put into unsure, we have provided you with the proper scoring adjustments already.`)
 
-                    getView(`<br><br> For the ones that you put into unsure, we have provided you with the proper scoring adjustments already. Unfortunately, for fairness' sake, we will not be showing if you they are good or evil travelers.`)
+                    if (misplacedTravelers === 0) {
+                        getView(`<br><br>You placed everyone in their correct lists!`)
+                    } else {
+                        getView(`<br><br>You misplaced ${misplacedTravelers - placedUnsure.length} traveler(s).`)
+
+                        if (placedUnsure.length > 0) {
+                            getView(`<br><br>Of those in the unsure list, please refer to the below:`)
+                        }
+
+                        let count = 0
+                        while (count < placedUnsure.length) {
+                            let alignment = ``;
+
+                            if (placedUnsure[count].good === true) {
+                                alignment = `good`;
+                            } else {
+                                alignment = 'evil';
+                            }
+
+                            getView(`<br>&emsp;- ${placedUnsure[count].name} is ${alignment}.`)
+                            count++;
+                        }
+                    }
+
+                    getView(`<br><br>Thank you for playing!`)
 
                     actionOneText.innerHTML = `Restart?`;
                     actionTwoText.innerHTML = `Quit?`;
@@ -836,6 +868,7 @@ const buttonOneSubmit = debounce(function() {
                 }
                 restart();
                 deleteAllSavedLists();
+                restoreLists();
                 joesHealth(-100);
                 clearView();
                 start();
@@ -1102,9 +1135,10 @@ const buttonTwoSubmit = debounce(function() {
         case 13:
             restart();
             deleteAllSavedLists();
+            restoreLists();
             joesHealth(-100);
             clearView();
-            setTimeout(close(), 2000);
+            setTimeout(close(), 3000);
             break;
         default:
             break;
@@ -1595,6 +1629,7 @@ function addToGood() {
         // Update the mental health based on decision made.
         if (traveler.good === false) {
             score--;
+            misplacedTravelers++;
             joesHealth(2);
         } else {
             score += 2;
@@ -1647,6 +1682,7 @@ const addToEvil = debounce(function() {
         // Update the mental health based on decision made.
         if (traveler.good === true) {
             score--;
+            misplacedTravelers++;
             joesHealth(2);
         } else {
             score += 2;
@@ -1693,8 +1729,8 @@ const addToUnsure = debounce(function() {
 
         getUnsureDisplay();
         
-        let traveler = allTravelers.find(({ traveler_id }) => traveler_id === travelerID).name;
-        viewText.innerHTML = `You hold ${traveler} in the back room for questioning.`;
+        let traveler = allTravelers.find(({ traveler_id }) => traveler_id === travelerID);
+        viewText.innerHTML = `You hold ${traveler.name} in the back room for questioning.`;
         continueBtn()
 
         // Update the mental health and score based on decision made.
@@ -1709,6 +1745,9 @@ const addToUnsure = debounce(function() {
         goodDiv.scrollTop = goodDiv.scrollHeight;
         evilDiv.scrollTop = evilDiv.scrollHeight;
         unsureDiv.scrollTop = unsureDiv.scrollHeight;
+
+        misplacedTravelers++;
+        placedUnsure.push(traveler);
 
         // To reset the number of actions for the continue section.
         actionNumber = 1;

@@ -143,7 +143,13 @@ module.exports = {
             DROP TABLE IF EXISTS good_travelers CASCADE;
             DROP TABLE IF EXISTS evil_travelers CASCADE;
             DROP TABLE IF EXISTS unsure_travelers CASCADE;
-            
+        `)
+        .then(dbRes => res.sendStatus(200))
+        .catch(err => console.log(err));
+    },
+
+    restoreLists: (req, res) => {
+        sequelize.query(`
             CREATE TABLE good_travelers(
                 good_traveler_id SERIAL PRIMARY KEY,
                 traveler_id INT REFERENCES travelers(traveler_id)

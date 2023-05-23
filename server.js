@@ -17,6 +17,7 @@ const {
     addEvilTravelers, 
     addUnsureTravelers, 
     deleteGEUTravelers,
+    restoreLists,
     getJoe,
     updateJoe,
     updateEventID,
@@ -34,6 +35,7 @@ app.post('/seed', seed);
 
 // To restart game
 app.delete('/all-travelers', deleteGEUTravelers);
+app.post(`/restore`, restoreLists);
 
 // Restart
 app.post('/new-game', newGame);
