@@ -218,14 +218,17 @@
 
 #good-travelers-div {
     overflow-y: scroll;
+    border-radius: 8px;
 }
 
 #evil-travelers-div {
     overflow-y: scroll;
+    border-radius: 8px;
 }
 
 #unsure-travelers-div {
     overflow-y: scroll;
+    border-radius: 8px;
 }
 
 #button-grid {
