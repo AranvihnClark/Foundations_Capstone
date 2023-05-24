@@ -9,51 +9,103 @@
 </head>
 <body>
   <section id="screen">
-    <div id="title-div" class="base-border default-bgColor">
-      <h1 id="title-text" class="text-center text-color default-bgColor title">Joe The Guard<br><em id="day-number" class="text-color default-bgColor hide"></em>
-      </h1>
-    </div>
-    
-    <div id="button-div" class="base-border">
-        <ul id="button-grid" class="default-bgColor">
-          <h1 id="action-counter" class="text-center text-color default-bgColor title">Action(s): <em id="action-number" class="default-bgColor"></em></h1>
-          <h1 id="mental-health-counter" class="text-center text-color default-bgColor title">Mental Health: <em id="mental-health-number" class="default-bgColor"></em></h1>
-          <h1 id="option-one-text" class="text-color default-bgColor button-text-size button-text"> <!-- Inspect Features --></h1>
-            <button id="button-one" class="base-border button-position border-radius">Confirm</button>
-          <h1 id="option-two-text" class="text-color default-bgColor button-text-size button-text"> <!-- Inspect Clothing --></h1>
-            <button id="button-two" class="base-border button-position border-radius hide">Confirm</button>
-          <h1 id="option-three-text" class="text-color default-bgColor button-text-size button-text"> <!-- Inspect Wares --></h1>
-            <button id="button-three" class="base-border button-position border-radius hide">Confirm</button>
-          <h1 id="option-four-text" class="text-color default-bgColor button-text-size button-text"> <!-- Ask For Help --></h1>
-            <button id="button-four" class="base-border button-position border-radius hide">Confirm</button>
-          <h1 id="option-five-text" class="text-color default-bgColor button-text-size button-text"> <!-- Special Interaction --></h1>
-            <button id="button-five" class="base-border button-position border-radius hide">Confirm</button>
-          <button id="good-button" class="base-border button-position border-radius hide">Good?</button>
-          <button id="evil-button" class="base-border button-position border-radius hide">Evil?</button>
-          <button id="unsure-button" class="base-border button-position border-radius hide">Unsure?</button>
-        </ul>
-    </div>
-    
-    <div id="view-div" class="base-border default-bgColor">
-      <h1 id="view-text" class="text-color default-bgColor"></h1>
-    </div>
-    
-    <div id="good-travelers-div" class="base-border list-grids default-bgColor">
-      <h1 class="text-center text-color default-bgColor title">Good Travelers</h1>
-      <h1 id="good-travelers-view" class="text-center text-color default-bgColor"></h1>
-    </div>
-    
-    <div id="evil-travelers-div" class="base-border list-grids default-bgColor">
-      <h1 class="text-center text-color default-bgColor title">Evil Travelers</h1>
-      <h1 id="evil-travelers-view" class="text-center text-color default-bgColor"></h1>
-    </div>
-    
-    <div id="unsure-travelers-div" class="base-border list-grids default-bgColor">
-      <h1 class="text-center text-color default-bgColor title">Unsure Travelers</h1>
-      <h1 id="unsure-travelers-view" class="text-center text-color default-bgColor"></h1>
-    </div>
-  </section>
+      <div id="title-div" class="base-border default-bgColor">
+        <h1 id="title-text" class="text-center text-color title">Joe The Guard<br><em id="day-number" class="text-color hide"></em>
+        </h1>
+      </div>
+      
+      <div id="button-div" class="base-border">
+          <ul id="button-grid" class="default-bgColor">
+            <h1 id="action-counter" class="text-center text-color title">Action(s): <em id="action-number"></em></h1>
+            <h1 id="mental-health-counter" class="text-center text-color title">Mental Health: <em id="mental-health-number"></em></h1>
+            <h1 id="option-one-text" class="text-color button-text-size button-text"></h1>
+              <button id="button-one" class="base-border button-position border-radius">Confirm</button>
+            <h1 id="option-two-text" class="text-color button-text-size button-text"></h1>
+              <button id="button-two" class="base-border button-position border-radius hide">Confirm</button>
+            <h1 id="option-three-text" class="text-color button-text-size button-text"></h1>
+              <button id="button-three" class="base-border button-position border-radius hide">Confirm</button>
+            <h1 id="option-four-text" class="text-color button-text-size button-text"></h1>
+              <button id="button-four" class="base-border button-position border-radius hide">Confirm</button>
+            <h1 id="option-five-text" class="text-color button-text-size button-text"></h1>
+              <button id="button-five" class="base-border button-position border-radius hide">Confirm</button>
+            <button id="good-button" class="base-border button-position border-radius hide">Good?</button>
+            <button id="evil-button" class="base-border button-position border-radius hide">Evil?</button>
+            <button id="unsure-button" class="base-border button-position border-radius hide">Unsure?</button>
+          </ul>
+      </div>
+      
+      <div id="view-div" class="base-border default-bgColor">
+        <h1 id="view-text" class="text-color"></h1>
+      </div>
+      
+      <div id="good-travelers-div" class="base-border list-grids default-bgColor">
+        <h1 class="text-center text-color title">Good Travelers</h1>
+        <h1 id="good-travelers-view" class="text-center text-color"></h1>
+      </div>
+      
+      <div id="evil-travelers-div" class="base-border list-grids default-bgColor">
+        <h1 class="text-center text-color title ">Evil Travelers</h1>
+        <h1 id="evil-travelers-view" class="text-center text-color"></h1>
+      </div>
+      
+      <div id="unsure-travelers-div" class="base-border list-grids default-bgColor">
+        <h1 class="text-center text-color title">Unsure Travelers</h1>
+        <h1 id="unsure-travelers-view" class="text-center text-color"></h1>
+      </div>
+    </section>
 
+    <section id="animated-bg">
+      <div class="set set1">
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+      </div>
+      <div class="set set2">
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+      </div>
+      <div class="set set3">
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+      </div>
+      <div class="set set4">
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+      </div>
+      <div class="set set5">
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+        <div class="image-div"><img src="../images/petal.png"></div>
+      </div>
+    </section>
   <script src="../node_modules/axios/dist/axios.min.js"></script>
   <script src="main.js"></script>
 

@@ -3,7 +3,137 @@
     padding: 0%;
     height: 100%;
     width: 100%;
-    background-color: #89C4E1;
+    box-sizing: border-box;
+    /* background-color: #89C4E1; */
+}
+
+#animated-bg {
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    background: radial-gradient(#43a2f0, #00027e);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.set {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.image-div {
+    position: absolute;
+    display: block;
+    height: auto;
+    width: auto;
+}
+
+.image-div:nth-child(1) {
+    left: 20%;
+    animation: animate 15s linear infinite;
+    animation-delay: -7s;
+}
+
+.image-div:nth-child(2) {
+    left: 50%;
+    animation: animate 20s linear infinite;
+    animation-delay: -5s;
+}
+
+.image-div:nth-child(3) {
+    left: 70%;
+    animation: animate 20s linear infinite;
+    animation-delay: 0s;
+}
+
+.image-div:nth-child(4) {
+    left: 0%;
+    animation: animate 15s linear infinite;
+    animation-delay: -5s;
+}
+
+.image-div:nth-child(5) {
+    left: 85%;
+    animation: animate 18s linear infinite;
+    animation-delay: -10s;
+}
+
+.image-div:nth-child(6) {
+    left: 0%;
+    animation: animate 12s linear infinite;
+}
+
+.image-div:nth-child(7) {
+    left: 15%;
+    animation: animate 14s linear infinite;
+    animation-delay: -10s;
+}
+
+.image-div:nth-child(8) {
+    left: 60;
+    animation: animate 15s linear infinite;
+}
+
+@keyframes animate{
+    0% {
+        opacity: 0;
+        top: -10%;
+        transform: translateX(20px) rotate(0deg);
+    }
+    10% {
+        opacity: 1;
+    }
+    20% {
+        transform: translateX(-50px) rotate(60deg);
+    }
+    40% {
+        transform: translateX(-50px) rotate(120deg);
+    }
+    60% {
+        transform: translateX(-50px) rotate(180deg);
+    }
+    80% {
+        transform: translateX(-50px) rotate(240deg);
+    }
+    100% {
+        top: 110%;
+        transform: translateX(-50px) rotate(320deg);
+    }
+}
+
+.set1 {
+    transform: rotate3d(1.5, 1.5, 1.5, -25deg);
+    z-index: 1;
+}
+
+.set2 {
+    transform: translateY(50px) translateX(-50px) scale(1.5) rotateY(180deg) rotate3d(-1, -2, 1.5, 55deg);
+    filter: blur(1px);
+    z-index: 2;
+}
+
+.set3 {
+    transform: translateY(-250px) translateX(100px) scale(1.2) rotateY(180deg) rotate3d(1.5, 1, 2, 35deg);
+    filter: blur(2px);
+    z-index: 3;
+}
+
+.set4 {
+    transform: translateY(50px) translateX(50px) scale(0.8) rotateY(180deg) rotate3d(1, 1.5, 2, 50deg);
+    filter: blur(4px);
+    z-index: 2;
+}
+
+.set5 {
+    transform: translateY(-100px) translateX(-50px) scale(1.2) rotateY(180deg) rotate3d(1, -1, 1, 45deg);
+    filter: blur(3px);
+    z-index: 2;
 }
 
 .hide {
@@ -19,7 +149,7 @@
 }
 
 .default-bgColor {
-    background-color: #F5EDCE;
+    background-color: rgb(245, 237, 206, 0.9);
 }
 
 .base-border {
@@ -28,6 +158,9 @@
 }
 
 #screen {
+    position: absolute;
+    top: 0%;
+    left: 0%;
     display: inline-grid;
     grid-template-columns: repeat(3, 30%);
     grid-template-rows: 8% 58% 29%;
@@ -35,6 +168,7 @@
     column-gap: 2%;
     justify-content: center;
     align-items: center;
+    z-index: 10;
 }
 
 #title-div {
@@ -42,6 +176,7 @@
     grid-column: 1 / 4;
     height: 84%;
     margin-top: 1%;
+    border-radius: 15px;
 }
 
 #title-text {
@@ -53,11 +188,13 @@
     grid-column: 1 / 1;
     width: 90%;
     margin-left: 5%;
+    border-radius: 15px;
 }
 
 #view-div {
     grid-column: 2 / 4;
     overflow-y: scroll;
+    border-radius: 15px;
 }
 
 .title {
@@ -82,9 +219,11 @@
 #good-travelers-div {
     overflow-y: scroll;
 }
+
 #evil-travelers-div {
     overflow-y: scroll;
 }
+
 #unsure-travelers-div {
     overflow-y: scroll;
 }
@@ -96,6 +235,7 @@
     row-gap: 4%;
     justify-content: center;
     align-content: center;
+    border-radius: 10px;
 }
 
 #action-counter {
@@ -119,10 +259,6 @@
 .button-text {
     font-weight: 600;
     grid-column: 1 / 3;
-}
-
-.faded-out {
-    color:#7a6363;
 }
 
 .border-radius {
