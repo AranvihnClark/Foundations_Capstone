@@ -150,17 +150,17 @@ module.exports = {
 
     restoreLists: (req, res) => {
         sequelize.query(`
-            CREATE TABLE good_travelers(
+            CREATE TABLE IF NOT EXISTS good_travelers(
                 good_traveler_id SERIAL PRIMARY KEY,
                 traveler_id INT REFERENCES travelers(traveler_id)
             );
         
-            CREATE TABLE evil_travelers(
+            CREATE TABLE IF NOT EXISTS evil_travelers(
                 evil_traveler_id SERIAL PRIMARY KEY,
                 traveler_id INT REFERENCES travelers(traveler_id)
             );
         
-            CREATE TABLE unsure_travelers(
+            CREATE TABLE IF NOT EXISTS unsure_travelers(
                 unsure_traveler_id SERIAL PRIMARY KEY,
                 traveler_id INT REFERENCES travelers(traveler_id)
             );

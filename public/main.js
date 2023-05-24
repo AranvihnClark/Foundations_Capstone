@@ -154,6 +154,9 @@ const start = debounce(function() {
     joesHealth(0);
     getTravelers();
     getJoesEvents();
+    getGoodDisplay();
+    getEvilDisplay();
+    getUnsureDisplay();
 }, 1000);
 
 function shuffler(array) {
@@ -577,11 +580,11 @@ function deleteAllSavedLists() {
     .catch(err => console.log(err));
 }
 
-function restoreLists() {
+const restoreLists = debounce(function() {
     axios.post(`${baseURL}/restore`)
     .then()
     .catch(err => console.log(err));
-}
+}, 300);
 
 const buttonOneSubmit = debounce(function() {
     if (actionOneText.innerHTML === 'Start') {
@@ -866,15 +869,12 @@ const buttonOneSubmit = debounce(function() {
                     actionTwoText.classList.add(`hide`);
                     actionTwoBtn.classList.add(`hide`);
                 }
-                restart();
                 deleteAllSavedLists();
                 restoreLists();
+                restart();
                 joesHealth(-100);
                 clearView();
                 start();
-                getGoodDisplay();
-                getEvilDisplay();
-                getUnsureDisplay();
                 break;
             default:
 
